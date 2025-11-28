@@ -1,41 +1,113 @@
 ## GANs Project: Face Generation
-### Getting the project files
+GAN Face Generation – README
+Overview
 
-The project files are located in the Project Workspace and include the following files:
+This project implements a Generative Adversial Network (GAN) to generate 64×64 face images using the CelebA dataset. The GAN consists of two models—a Generator and a Discriminator—that train together in an adversarial setup:
 
-* **`dlnd_face_generation_starter.ipynb`**
-* **`README.md`**
-* **`requirements.txt`**
-* **`tests.py`**
-* **`processed-celeba-small.zip`**
+The Generator creates fake face images.
 
-We highly recommend using the Project Workspace to complete your project; however, if you choose to not use the workspace, you can download the project files from the Project Workspace.
+The Discriminator learns to classify images as real or fake.
 
-### Instructions
+As training progresses, the generator becomes better at producing realistic-looking faces.
 
-Open the notebook file, `dlnd_face_generation_starter.ipynb` and follow the instructions. This project is organized as follows:
+Project Structure
+Generator
 
-* **Data Pipeline**: implement a data augmentation function and a custom dataset class to load the images and transform them.
-* **Model Implementation**: build a custom generator and a custom discriminator to make your GAN
-* **Loss Functions and Gradient Penalty**: decide on loss functions and whether you want to use gradient penalty or not.
-* **Training Loop**: implement the training loop and decide on which strategy to use 
+Starts from a 128-dimensional latent vector.
 
-Each section requires you to make design decisions based on the experience you have gathered in this course.  Do not hesitate to come back to a section to improve your model or your data pipeline based on the results that you are getting. 
+Uses a fully connected layer to create a 4×4×512 feature map.
 
-Building a deep learning model is an iterative process, and it's especially true for GANs! Good luck!
+Upsamples via ConvTranspose2D layers: 4×4 → 8×8 → 16×16 → 32×32 → 64×64.
 
-### Submitting Your Project
+Final activation: Tanh (to match normalized image range).
 
-For this project you will need to submit one file – **dlnd_face_generation.ipynb**
+Discriminator
 
+Takes a 3×64×64 image as input.
 
-The full project may be submitted in two ways:
+Applies convolutional downsampling.
 
-**Project completed in Project Workspace:**
+Outputs a single (1, 1, 1) score representing real/fake likelihood.
 
-* Your project may be submitted directly via the Project Workspace by pressing the **`Submit`** button in the bottom right corner of the workspace. 
+Uses LeakyReLU for stability.
 
-**Project completed outside of Project Workspace:**
+Training Loop
 
-* Your project may be submitted using the Project Submission page by pressing the **`Submit Project`** button in the top right corner of the page and following those directions.
-* You will need to create a zip file of the required project file and submit the zip file.
+Alternates between a discriminator step and a generator step.
+
+Logs losses for both networks.
+
+After every epoch, generates sample images using a fixed noise vector.
+
+Dataset
+
+The project uses the CelebA dataset, a large collection of celebrity face images.
+Important considerations:
+
+The dataset is biased, mainly consisting of young, light-skinned Western celebrity faces.
+
+Generated samples reflect this bias and lack demographic diversity.
+
+Images are resized and normalized to the range [-1, 1].
+
+Model Design Choices
+
+Chosen architecture: DCGAN-style, because it provides a simple, stable baseline for 64×64 image generation.
+
+latent_dim = 128, balancing expressive power with training stability.
+
+Adam optimizer with betas=(0.5, 0.999) to improve GAN convergence.
+
+Standard GAN loss, as required for the course and simple to debug.
+
+20 epochs due to compute and time limitations.
+
+These choices allow the model to learn broad face structures while keeping training manageable.
+
+Results
+
+Generated faces show recognizable structure (eyes, nose, mouth placement).
+
+Images remain somewhat blurry with limited detail.
+
+Some mode collapse appears (similar-looking samples).
+
+Outputs clearly reflect the dataset’s demographic bias.
+
+Potential Improvements
+
+To enhance realism, diversity, and stability, the model could be improved with:
+
+WGAN-GP loss or LSGAN for stabler gradients.
+
+More training epochs (100–200+).
+
+A deeper generator and discriminator.
+
+Dataset balancing or replacement with FairFace.
+
+Data augmentation.
+
+Learning rate scheduling or smaller batch sizes.
+
+How to Run
+
+Install dependencies (PyTorch, torchvision, numpy, matplotlib).
+
+Download and preprocess the CelebA dataset.
+
+Initialize the generator and discriminator.
+
+Run the training loop.
+
+View generated images after each epoch.
+
+Files
+
+face_generation.ipynb – Main notebook
+
+models.py – Generator and Discriminator code
+
+utils.py – Helper functions
+
+README.md – Project description (this file)
